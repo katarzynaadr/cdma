@@ -335,20 +335,20 @@ function sygnal_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 spread =get(handles.dmod,'String');
 guidata(hObject, handles);
-los = length(spread);
 spread=str2num(spread);
+los = length(spread);
 spread=spread';
 m=get(handles.syg,'String');
 m=str2num(m);
 m=m';
 c=get(handles.osequence,'String');
-c=c-'0';
+c=str2num(c);
 c=c';
 i=1;
 k=1;
-for k=1:length(spread)
+for k=1:los
 s=0;
-for j=1:length(m)
+for j=1:15
     temp(1,j)=xor(spread(1,k),c(1,j));
     s=s+temp(1,j);
 end
@@ -364,19 +364,7 @@ despreaded_signal=b2;
 hold on
 axes(handles.axes6)
 stem(despreaded_signal)
-p='Transmisja poprawna';
-n='Transmisja niepoprawna';
-if(despreaded_signal==m)
-    set(handles.transmisja,'String',p);
-    set(handles.transmisja,'Visible','on');
-    guidata(hObject, handles);
 
-else
-    set(handles.transmisja,'String',n);
-    set(handles.transmisja,'Visible','on');
-    guidata(hObject, handles);
-
-end
 
 function syg_Callback(hObject, eventdata, handles)
 % hObject    handle to syg (see GCBO)
