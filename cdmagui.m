@@ -22,7 +22,7 @@ function varargout = cdmagui(varargin)
 
 % Edit the above text to modify the response to help cdmagui
 
-% Last Modified by GUIDE v2.5 26-Jun-2014 17:07:12
+% Last Modified by GUIDE v2.5 29-Jun-2014 13:35:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -346,24 +346,30 @@ c=str2num(c);
 c=c';
 i=1;
 k=1;
-for k=1:los
+while(k<los)
 s=0;
-for j=1:15
+for j=1:length(c)
     temp(1,j)=xor(spread(1,k),c(1,j));
+    k=k+1;
     s=s+temp(1,j);
 end
 if(s==0)
-    b2(1,j)=0;
+    b2(1,i)=0;
 else
-    b2(1,j)=1;
+    b2(1,i)=1;
 end
-j=j+1;
+i=i+1;
 end
 despreaded_signal=b2;
+t = linspace(0,length(spread),length(spread)*100);
+t1=0:0.01:.99;
+y=int(vpa(despreaded_signal),'t1',0,1);
 %b=rectpulse(a(1,:),l)
 hold on
 axes(handles.axes6)
 stem(despreaded_signal)
+despreaded_signal=num2str(despreaded_signal);
+set(handles.dane,'String',despreaded_signal);
 
 
 function syg_Callback(hObject, eventdata, handles)
@@ -806,7 +812,7 @@ function ber_Callback(hObject, eventdata, handles)
 % hObject    handle to ber (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-y=get(handles.dmod,'String');
+y=get(handles.dane,'String');
 guidata(hObject, handles);
 y=str2num(y);
 y=y';
@@ -845,7 +851,30 @@ SNR = -4:12;
 EbN0=SNR(1):0.001:SNR(length(SNR));
 error = (1/2)*erfc(sqrt(10.^(EbN0/10)));
 %sError=
-semilogy(SNR,simBER,'*r',EbN0 ,error,'green');
+semilogy(50,simBER,'*r',EbN0 ,error,'green');
 title('BER')
 xlabel('SNR [dB]');
 ylabel('BER')
+
+
+
+function dane_Callback(hObject, eventdata, handles)
+% hObject    handle to dane (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of dane as text
+%        str2double(get(hObject,'String')) returns contents of dane as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function dane_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to dane (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
