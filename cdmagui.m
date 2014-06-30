@@ -570,18 +570,18 @@ function modulator_Callback(hObject, eventdata, handles)
 %         s(i)=sqrt(2*E_s)*(-cos(w*t));
 %     end
 % end
-% x=get(handles.dsequence,'String');
-% guidata(hObject, handles);
-% x=str2num(x);
-% x=x';
-% N=length(x);
-% x(x==0)=-1;
-% t=0.01:0.01:N;
-% c=2*sin(2*pi*t);
-% for i=1:1:N
-%     m((i-1)*100+1:i*100)=x(i);
-% end
-% y=c.*m;
+x=get(handles.dsequence,'String');
+guidata(hObject, handles);
+x=str2num(x);
+x=x';
+N=length(x);
+x(x==0)=-1;
+t=0.01:0.01:N;
+c=2*sin(2*pi*t);
+for i=1:1:N
+    m((i-1)*100+1:i*100)=x(i);
+end
+y1=c.*m;
 dane=get(handles.dsequence,'String');
 dane=str2num(dane);
 SNR = 50;                                     %10*log10(Eb_N0_dB)+10*log10(1/1); % multiple Eb/N0 values; log10(bitrate/Bandwidth)
@@ -601,7 +601,9 @@ nosna = sin(pi*fc*t);                               % Fala nosna
 bpsk_mod = d_d2.*nosna;                             % Modulowany przebieg
 y=bpsk_mod;
 axes(handles.axes7)
-plot(t(1:1500),y(1:1500)) %Transmitowany sygna³
+plot(t(1:1500),y1(1:1500)) %Transmitowany sygna³
+y1=num2str(y1);
+set(handles.sawgn,'String',y1);
 guidata(hObject, handles);
 y=num2str(y);
 set(handles.mod,'String',y);
@@ -812,11 +814,11 @@ function ber_Callback(hObject, eventdata, handles)
 % hObject    handle to ber (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-y=get(handles.dane,'String');
+y=get(handles.dmod,'String');
 guidata(hObject, handles);
 y=str2num(y);
 y=y';
-dane=get(handles.syg,'String');
+dane=get(handles.dsequence,'String');
 guidata(hObject, handles);
 dane=str2num(dane);
 dane=dane';
@@ -824,37 +826,46 @@ w=real(y)>0;
 z=zeros(1,length(dane));
 j=z;
 bit=z;
-for a=0:length(dane)-1
-    for b=1:15
-        if(w(100*a+6*b)==0)
-            z(a+1)=z(a+1)+1'
-        else
-            j(a+1)=j(a+1)+1;
-        end
+% for a=0:length(dane)-1
+%     for b=1:15
+%         if(w(100*a+6*b)==0)
+%             z(a+1)=z(a+1)+1'
+%         else
+%             j(a+1)=j(a+1)+1;
+%         end
+%     end
+% end
+% for a=0:length(dane)-1
+%     for b=1:15
+%         if(z(a+1)>j(a+1))
+%             bit(a+1)=0;
+%         else
+%             bit(a+1)=1;
+%         end
+%     end
+% end
+% nErr=size(find([dane-bit]),2);
+% nErr
+% simBER=nErr/length(dane);
+% simBER
+nErr=0;
+for i=1:length(dane)
+    if(dane(i)~=y(i))
+        nErr=nErr+1;
     end
 end
-for a=0:length(dane)-1
-    for b=1:15
-        if(z(a+1)>j(a+1))
-            bit(a+1)=0;
-        else
-            bit(a+1)=1;
-        end
-    end
-end
-nErr=size(find([dane-bit]),2);
-nErr
 simBER=nErr/length(dane);
-simBER
 figure();
-SNR = -4:12;
+SNR = 10:30;
 EbN0=SNR(1):0.001:SNR(length(SNR));
 error = (1/2)*erfc(sqrt(10.^(EbN0/10)));
 %sError=
-semilogy(50,simBER,'*r',EbN0 ,error,'green');
+semilogy(SNR,simBER,'*r',EbN0 ,error,'green');
+%semilogy(EbN0,error,'green');
 title('BER')
 xlabel('SNR [dB]');
 ylabel('BER')
+simBER
 
 
 
