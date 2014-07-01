@@ -22,7 +22,7 @@ function varargout = cdmagui(varargin)
 
 % Edit the above text to modify the response to help cdmagui
 
-% Last Modified by GUIDE v2.5 29-Jun-2014 13:35:06
+% Last Modified by GUIDE v2.5 01-Jul-2014 16:08:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -173,11 +173,11 @@ guidata(hObject, handles);
 b =a-'0';
 l = length(a);
 k=1;
-gold=get(handles.ssequence,'String');
+c=get(handles.ssequence,'String');
 guidata(hObject, handles);
-c=gold-'0'
+c=c-'0'
 c=c'
-g=length(gold);
+g=length(c);
 for i=1:l
 for j=1:g
     spread(1,k)=xor(b(1,i),c(1,j));
@@ -483,9 +483,10 @@ x=str2num(x);
 % t=0.01:0.01:N;
 % c=sin(2*pi*t);
 % y=p.*c;
+global SNR;
 dane=get(handles.dsequence,'String');
 dane=str2num(dane);
-SNR = 50;                                     %10*log10(Eb_N0_dB)+10*log10(1/1); % multiple Eb/N0 values; log10(bitrate/Bandwidth)
+%SNR = get(handles.snr1);                                     %10*log10(Eb_N0_dB)+10*log10(1/1); % multiple Eb/N0 values; log10(bitrate/Bandwidth)
 NRZ = 2*dane-1;                                     % Kodowanie NRZ
 T = 1;                                              % Czas trwania bitu (okres)
 fc = 3/T;                                           % Czestotlowosc nosna
@@ -584,11 +585,11 @@ end
 y1=c.*m;
 dane=get(handles.dsequence,'String');
 dane=str2num(dane);
-SNR = 50;                                     %10*log10(Eb_N0_dB)+10*log10(1/1); % multiple Eb/N0 values; log10(bitrate/Bandwidth)
+global SNR;                                     %10*log10(Eb_N0_dB)+10*log10(1/1); % multiple Eb/N0 values; log10(bitrate/Bandwidth)
 NRZ = 2*dane-1;                                     % Kodowanie NRZ
 T = 1;                                              % Czas trwania bitu (okres)
 fc = 3/T;                                           % Czestotlowosc nosna
-t = linspace(0,length(dane),length(dane)*100);      % probki, czasy
+t = linspace(0,length(NRZ),length(NRZ)*100);      % probki, czasy
 N = length(t);                                      % Liczba probek
 Lpnb = N/length(dane);                              % Liczba probek na bit
 dod_dane = repmat(dane',1,Lpnb);                    % powtarzamy bity Lpnb razy
@@ -630,8 +631,8 @@ y=str2num(y);
 y=y';
 fs=100;
 Ej=1;
-snr=50;
-r=sqrt(fs*Ej*10^(-snr/10))*randn(1,length(y));
+global SNR;
+r=sqrt(fs*Ej*10^(-SNR/10))*randn(1,length(y));
 %r=randn(1,length(y));
 r=r';
 k=y+r;
@@ -854,19 +855,38 @@ for i=1:length(dane)
         nErr=nErr+1;
     end
 end
-simBER=nErr/length(dane);
+sBER=nErr/length(dane);
+% figure();
+% SNRp = -12:50;
+% EbN0=SNRp(1):0.001:SNRp(length(SNRp));
+% error = (1/2)*erfc(sqrt(10.^(EbN0/10)));
+% %sError=
+% semilogy(SNRp,simBER,'*r',EbN0 ,error,'green');
+% %semilogy(EbN0,error,'green');
+% title('BER')
+% xlabel('SNR [dB]');
+% ylabel('BER')
+% simBER
+enb0=1;
+fk= 1;
+dseq = 2;
+SNRp=-24:12;
+b=[];
+k=1;
+for i=-24:12
+    b(k)=ber(i);
+    k=k+1;
+end
 figure();
-SNR = 10:30;
-EbN0=SNR(1):0.001:SNR(length(SNR));
-error = (1/2)*erfc(sqrt(10.^(EbN0/10)));
-%sError=
-semilogy(SNR,simBER,'*r',EbN0 ,error,'green');
-%semilogy(EbN0,error,'green');
+x=-24:12;
+fb=fk./dseq;
+p=10.^(-x./10).*enb0.*fk./dseq;
+error=0.5.*erfc(sqrt(enb0*fb*dseq./p));
+semilogy(SNRp,b,'*r',x,error,'green');
 title('BER')
-xlabel('SNR [dB]');
-ylabel('BER')
-simBER
-
+xlabel('SNR');
+ylabel('BER');
+legend('Symulacja','Teoria')
 
 
 function dane_Callback(hObject, eventdata, handles)
@@ -888,4 +908,53 @@ function dane_CreateFcn(hObject, eventdata, handles)
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on slider movement.
+function snr_Callback(hObject, eventdata, handles)
+% hObject    handle to snr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+% --- Executes during object creation, after setting all properties.
+function snr_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to snr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on slider movement.
+function snr1_Callback(hObject, eventdata, handles)
+% hObject    handle to snr1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global SNR;
+handles.snr10=get(hObject,'String');
+guidata(hObject,handles);
+SNR=str2double(get(hObject,'String'));
+SNR
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+% --- Executes during object creation, after setting all properties.
+function snr1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to snr1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
