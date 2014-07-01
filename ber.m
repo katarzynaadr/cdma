@@ -40,15 +40,15 @@ z=0:1:(l-1);
 NRZ = 2*a-1;                                        % Kodowanie NRZ
 T = 1;                                              % Czas trwania bitu (okres)
 fc = 3/T;                                           % Czestotlowosc nosna
-                                         % Czestotlowosc nosna
+                                       
 t = linspace(0,length(NRZ),length(NRZ)*100);      % probki, czasy
 N = length(t);                                      % Liczba probek
 Lpnb = N/length(NRZ);                              % Liczba probek na bit
-                    % powtarzamy bity Lpnb razy
+                   
 dod_dane2 = repmat(NRZ',1,Lpnb);
                                    % Transpozycja wierszy i kolumn
 d_d2 = dod_dane2';
-                                    % Konwersja do jednego wiersza (100x1, 100x0, itd..)
+                                    
 d_d2 = d_d2(:)';     
 nosna = sin(pi*fc*t);                               % Fala nosna 
 bpsk_mod = d_d2.*nosna;    
@@ -64,7 +64,7 @@ for i=1:length(odfiltr)
         bpsk_demod(i)=0;
     end
 end
-% Bledy - zwraca ich ilosc
+
 y = bpsk_demod;                  
 w = real(y)>0;
 z=zeros(1,length(NRZ));
